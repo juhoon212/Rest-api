@@ -1,17 +1,13 @@
 package com.example.demoinflearnrestapi.events;
 
-import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Builder @AllArgsConstructor @NoArgsConstructor
-@Getter @Setter @EqualsAndHashCode(of = "id")
-@Entity
-public class Event {
+@Builder @NoArgsConstructor @AllArgsConstructor
+@Data
+public class EventDto {
 
-    @Id @GeneratedValue
-    private Integer id;
     private String name;
     private String description;
     private LocalDateTime beginEnrollmentDateTime;
@@ -22,11 +18,4 @@ public class Event {
     private int basePrice; // optional
     private int maxPrice;
     private int limitOfEnrollment;
-    private boolean offline;
-    private boolean free;
-
-    @Enumerated(value = EnumType.STRING) // Enum 타입을 스트링으로 저장
-    private EventStatus eventStatus = EventStatus.DRAFT;
-
-
 }
