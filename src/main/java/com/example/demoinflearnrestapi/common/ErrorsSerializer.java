@@ -32,7 +32,7 @@ public class ErrorsSerializer extends JsonSerializer<Errors> {
             }
         });
 
-        errors.getGlobalErrors().stream().forEach(e -> {
+        errors.getGlobalErrors().forEach(e -> {
             try {
                 jsonGenerator.writeStartObject();
                 jsonGenerator.writeStringField("objectName", e.getObjectName());
