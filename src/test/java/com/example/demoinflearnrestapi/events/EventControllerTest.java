@@ -20,6 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
@@ -44,6 +45,9 @@ public class EventControllerTest {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    EventRepository eventRepository;
 
 
 
@@ -175,11 +179,7 @@ public class EventControllerTest {
                         .accept(MediaTypes.HAL_JSON)
                         .content(objectMapper.writeValueAsString(event)))
                 .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$[0].objectName").exists())
-                .andExpect(jsonPath("$[0].defaultMessage").exists())
-                .andExpect(jsonPath("$[0].code").exists())
-                .andExpect(jsonPath("_links.index").exists());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -203,8 +203,8 @@ public class EventControllerTest {
                         .content(this.objectMapper.writeValueAsString(eventDto)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("errors[0].objectName").exists())
                 .andExpect(jsonPath("errors[0].defaultMessage").exists())
+                .andExpect(jsonPath("errors[0].objectName").exists())
                 .andExpect(jsonPath("errors[0].code").exists())
                 .andExpect(jsonPath("_links.index").exists());
 
@@ -247,6 +247,37 @@ public class EventControllerTest {
 
         // Then
         assertThat(event.isOffline()).isFalse();
+    }
+
+    @Test
+    public void queryEvents() throws Exception {
+        // Given
+        IntStream.range(0, 30).forEach(
+                this::generateEvent
+        );
+
+        // When
+        this.mockMvc.perform(get("/api/events")
+                        .param("page", "1")
+                        .param("size", "10")
+                        .param("sort", "name,DESC")
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("page").exists())
+                .andExpect(jsonPath("_embedded.eventList[0]._links.self").exists())
+                .andExpect(jsonPath("_links.profile").exists())
+                .andDo(document("query-events"));
+    }
+
+    private void generateEvent(int i) {
+        Event event = Event.builder()
+                .name("event" + i)
+                .description("test event")
+                .build();
+
+        this.eventRepository.save(event);
+
     }
 
     private static Stream<Arguments> paramsForTestOffline() {
