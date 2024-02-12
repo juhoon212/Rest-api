@@ -1,5 +1,7 @@
 package com.example.demoinflearnrestapi.events;
 
+import com.example.demoinflearnrestapi.accounts.Account;
+import com.example.demoinflearnrestapi.accounts.AccountRole;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,6 +29,9 @@ public class Event {
 
     @Enumerated(value = EnumType.STRING) // Enum 타입을 스트링으로 저장
     private EventStatus eventStatus = EventStatus.DRAFT;
+
+    @ManyToOne
+    private Account manager;
 
 
     public void update() {
